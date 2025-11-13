@@ -1,0 +1,1230 @@
+{% extends "base.html" %}
+
+{% block title %}Extract Document - Smart Document Extractor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="text-center mb-12">
+        <div class="animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Document <span class="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">Extraction</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Transform your documents into editable text using advanced AI-powered OCR technology. 
+                Upload an image, take a photo, or drag and drop your files to get started.
+            </p>
+            <div class="flex items-center justify-center mt-6 space-x-8 text-sm text-gray-500">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                    <span>High Accuracy OCR</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-language text-blue-500 mr-2"></i>
+                    <span>Multi-Language Support</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                    <span>PDF Export</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Methods Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- File Upload Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 card-hover animate-slide-up">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-cloud-upload-alt text-2xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Upload Document</h3>
+                <p class="text-gray-600">Select files from your device or drag and drop</p>
+            </div>
+            
+            <div class="file-upload-area rounded-xl p-8 text-center cursor-pointer mb-6 relative overflow-hidden"
+                 id="fileUploadArea"
+                 ondrop="dropHandler(event);" 
+                 ondragover="dragOverHandler(event);"
+                 ondragleave="dragLeaveHandler(event);">
+                
+                <input type="file" 
+                       id="fileInput" 
+                       accept="image/*,.pdf" 
+                       multiple
+                       class="hidden" 
+                       onchange="handleFileSelect(event)">
+                
+                <div id="uploadContent" class="space-y-4">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-file-image text-3xl text-gray-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-lg font-medium text-gray-700 mb-2">Drop your files here</p>
+                        <p class="text-sm text-gray-500 mb-4">or click to browse</p>
+                        <button type="button" 
+                                onclick="document.getElementById('fileInput').click()" 
+                                class="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-all duration-200 btn-hover-lift inline-flex items-center">
+                            <i class="fas fa-folder-open mr-2"></i>
+                            Choose Files
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-400 space-y-1">
+                        <p>Supported formats: PNG, JPG, JPEG, PDF</p>
+                        <p>Maximum file size: 16MB</p>
+                        <p>Multiple files supported</p>
+                    </div>
+                </div>
+                
+                <!-- Upload Progress -->
+                <div id="uploadProgress" class="hidden">
+                    <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div class="loader border-4 border-t-4 border-primary-600 rounded-full w-8 h-8"></div>
+                    </div>
+                    <p class="text-lg font-medium text-gray-700 mb-2">Uploading...</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                        <div id="progressBar" class="progress-bar h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500" id="progressText">Preparing upload...</p>
+                </div>
+            </div>
+            
+            <!-- Recent Uploads -->
+            <div id="recentUploads" class="hidden">
+                <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+                    <i class="fas fa-clock mr-2 text-gray-400"></i>
+                    Recent Uploads
+                </h4>
+                <div id="recentUploadsList" class="space-y-2">
+                    <!-- Recent uploads will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Camera Capture Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 card-hover animate-slide-up" style="animation-delay: 0.1s;">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-camera text-2xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Camera Capture</h3>
+                <p class="text-gray-600">Take photos directly with your device camera</p>
+            </div>
+            
+            <div class="rounded-xl border-2 border-gray-200 p-6 text-center relative overflow-hidden">
+                <!-- Camera Initialization -->
+                <div id="cameraSection" class="space-y-4">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-camera text-3xl text-gray-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-lg font-medium text-gray-700 mb-2">Ready to capture</p>
+                        <p class="text-sm text-gray-500 mb-6">Position your document in good lighting</p>
+                        <button type="button" 
+                                onclick="startCamera()" 
+                                class="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-all duration-200 btn-hover-lift inline-flex items-center">
+                            <i class="fas fa-video mr-2"></i>
+                            Start Camera
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-400 space-y-1">
+                        <p>• Ensure good lighting</p>
+                        <p>• Keep document flat</p>
+                        <p>• Fill the frame</p>
+                    </div>
+                </div>
+                
+                <!-- Video Stream -->
+                <div id="videoSection" class="hidden">
+                    <div class="video-container mb-4">
+                        <video id="video" 
+                               class="w-full rounded-lg shadow-lg" 
+                               autoplay 
+                               playsinline 
+                               style="max-height: 300px; object-fit: cover;">
+                        </video>
+                        <!-- Camera overlay guides -->
+                        <div class="absolute inset-0 pointer-events-none">
+                            <div class="w-full h-full border-2 border-white border-opacity-50 rounded-lg relative">
+                                <div class="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-white"></div>
+                                <div class="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-white"></div>
+                                <div class="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-white"></div>
+                                <div class="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-white"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Camera Controls -->
+                    <div class="flex justify-center space-x-4">
+                        <button type="button" 
+                                onclick="capturePhoto()" 
+                                class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 btn-hover-lift inline-flex items-center">
+                            <i class="fas fa-camera mr-2"></i>
+                            Capture
+                        </button>
+                        <button type="button" 
+                                onclick="stopCamera()" 
+                                class="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-all duration-200 btn-hover-lift inline-flex items-center">
+                            <i class="fas fa-stop mr-2"></i>
+                            Stop
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Captured Photo Preview -->
+                <div id="photoPreview" class="hidden">
+                    <div class="mb-4">
+                        <img id="capturedImage" class="w-full rounded-lg shadow-lg" alt="Captured document">
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button type="button" 
+                                onclick="processCapture()" 
+                                class="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-all duration-200 btn-hover-lift inline-flex items-center">
+                            <i class="fas fa-check mr-2"></i>
+                            Use This Photo
+                        </button>
+                        <button type="button" 
+                                onclick="retakePhoto()" 
+                                class="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-all duration-200 btn-hover-lift inline-flex items-center">
+                            <i class="fas fa-redo mr-2"></i>
+                            Retake
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Canvas for photo capture -->
+            <canvas id="canvas" class="hidden"></canvas>
+        </div>
+    </div>
+
+    <!-- Processing Section -->
+    <div id="processingSection" class="bg-white rounded-2xl shadow-xl p-8 mb-8 hidden animate-fade-in">
+        <div class="text-center">
+            <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div class="loader border-4 border-t-4 border-primary-600 rounded-full w-10 h-10"></div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">Processing Your Document</h3>
+            <p class="text-gray-600 mb-6">Our AI is extracting text from your document. This may take a few moments.</p>
+            
+            <!-- Processing Steps -->
+            <div class="max-w-md mx-auto">
+                <div class="space-y-4">
+                    <div id="step1" class="flex items-center text-left p-3 rounded-lg bg-gray-50">
+                        <div class="flex-shrink-0 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-upload text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Uploading document</p>
+                            <p class="text-sm text-gray-500">Transferring your file...</p>
+                        </div>
+                        <div class="ml-auto">
+                            <i class="fas fa-check text-green-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div id="step2" class="flex items-center text-left p-3 rounded-lg bg-yellow-50 border-l-4 border-yellow-400">
+                        <div class="flex-shrink-0 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mr-3">
+                            <div class="loader border-2 border-t-2 border-white rounded-full w-4 h-4"></div>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Processing image</p>
+                            <p class="text-sm text-gray-500">Optimizing for OCR...</p>
+                        </div>
+                    </div>
+                    
+                    <div id="step3" class="flex items-center text-left p-3 rounded-lg bg-gray-50 opacity-50">
+                        <div class="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-eye text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Extracting text</p>
+                            <p class="text-sm text-gray-500">Reading document content...</p>
+                        </div>
+                    </div>
+                    
+                    <div id="step4" class="flex items-center text-left p-3 rounded-lg bg-gray-50 opacity-50">
+                        <div class="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-magic text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Finalizing</p>
+                            <p class="text-sm text-gray-500">Preparing results...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="bg-white rounded-2xl shadow-xl p-8 hidden animate-fade-in">
+        <!-- Results Header -->
+        <div class="flex items-center justify-between mb-8 pb-6 border-b border-gray-200">
+            <div>
+                <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-file-text mr-3 text-primary-600"></i>
+                    Extraction Results
+                </h3>
+                <p class="text-gray-600 mt-1">Your document has been successfully processed</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="downloadResults()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors btn-hover-lift">
+                    <i class="fas fa-download mr-2"></i>Download
+                </button>
+                <button onclick="startNew()" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors btn-hover-lift">
+                    <i class="fas fa-plus mr-2"></i>New Document
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <!-- Original Document Preview -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-lg font-semibold text-gray-900">Original Document</h4>
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                        <span id="originalFileInfo">Processing...</span>
+                    </div>
+                </div>
+                <div class="border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <div class="relative">
+                        <img id="originalImage" 
+                             class="max-w-full h-auto rounded-lg shadow-lg mx-auto" 
+                             alt="Original document"
+                             style="max-height: 400px;">
+                        <!-- Image Loading Placeholder -->
+                        <div id="imagePlaceholder" class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-image text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500">Loading image...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extracted Text -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-lg font-semibold text-gray-900">Extracted Text</h4>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="copyText('extractedText')" 
+                                class="text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
+                                title="Copy text">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button onclick="editText('extractedText')" 
+                                class="text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
+                                title="Edit text">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="border-2 border-gray-200 rounded-xl bg-gray-50">
+                    <div class="p-4 border-b border-gray-200 bg-white rounded-t-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                <span class="status-dot success"></span>
+                                <span>Text extracted successfully</span>
+                            </div>
+                            <div class="text-sm text-gray-500" id="extractedWordCount">
+                                0 words
+                            </div>
+                        </div>
+                    </div>
+                    <textarea id="extractedText" 
+                              class="w-full h-80 p-4 border-none bg-transparent resize-none focus:outline-none custom-scrollbar font-mono text-sm leading-relaxed" 
+                              placeholder="Extracted text will appear here..."
+                              readonly></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Section -->
+        <div class="mt-12 border-t border-gray-200 pt-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-language mr-3 text-blue-600"></i>
+                        Translation Options
+                    </h4>
+                    <p class="text-gray-600 mt-1">Translate your extracted text to any supported language</p>
+                </div>
+                <div class="text-sm text-gray-500">
+                    Powered by Groq AI
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-flag mr-1"></i>Source Language
+                    </label>
+                    <select id="sourceLanguage" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
+                        <option value="auto">Auto-detect</option>
+                        {% for code, name in languages.items() %}
+                        <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-globe mr-1"></i>Target Language
+                    </label>
+                    <select id="targetLanguage" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
+                        {% for code, name in languages.items() %}
+                        <option value="{{ code }}" {% if code == 'es' %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="flex items-end">
+                    <button onclick="translateText()" 
+                            class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 btn-hover-lift flex items-center justify-center">
+                        <i class="fas fa-language mr-2"></i>
+                        <span id="translateButtonText">Translate</span>
+                    </button>
+                </div>
+                
+                <div class="flex items-end">
+                    <button onclick="swapLanguages()" 
+                            class="w-full bg-gray-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-gray-600 transition-all duration-200 btn-hover-lift flex items-center justify-center"
+                            title="Swap languages">
+                        <i class="fas fa-exchange-alt mr-2"></i>
+                        Swap
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Translation Result -->
+            <div id="translationResult" class="hidden animate-fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h5 class="text-lg font-semibold text-gray-900">Translated Text</h5>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="copyText('translatedText')" 
+                                class="text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
+                                title="Copy translation">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button onclick="editText('translatedText')" 
+                                class="text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
+                                title="Edit translation">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="border-2 border-blue-200 rounded-xl bg-blue-50">
+                    <div class="p-4 border-b border-blue-200 bg-white rounded-t-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2 text-sm text-blue-600">
+                                <span class="status-dot info"></span>
+                                <span>Translation completed</span>
+                            </div>
+                            <div class="text-sm text-gray-500" id="translatedWordCount">
+                                0 words
+                            </div>
+                        </div>
+                    </div>
+                    <textarea id="translatedText" 
+                              class="w-full h-60 p-4 border-none bg-transparent resize-none focus:outline-none custom-scrollbar font-mono text-sm leading-relaxed" 
+                              placeholder="Translation will appear here..."
+                              readonly></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <div class="flex flex-wrap gap-4">
+                <button onclick="generatePDF()" 
+                        class="bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-all duration-200 btn-hover-lift flex items-center">
+                    <i class="fas fa-file-pdf mr-2"></i>
+                    Generate PDF
+                </button>
+                
+                <button onclick="saveDocument()" 
+                        class="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-all duration-200 btn-hover-lift flex items-center">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Document
+                </button>
+                
+                <button onclick="shareDocument()" 
+                        class="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-all duration-200 btn-hover-lift flex items-center">
+                    <i class="fas fa-share mr-2"></i>
+                    Share
+                </button>
+                
+                <button onclick="emailDocument()" 
+                        class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 btn-hover-lift flex items-center">
+                    <i class="fas fa-envelope mr-2"></i>
+                    Email
+                </button>
+                
+                <button onclick="printDocument()" 
+                        class="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-all duration-200 btn-hover-lift flex items-center">
+                    <i class="fas fa-print mr-2"></i>
+                    Print
+                </button>
+            </div>
+        </div>
+
+        <!-- Document Statistics -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <h5 class="text-lg font-semibold text-gray-900 mb-4">Document Statistics</h5>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-primary-600" id="statWords">0</div>
+                    <div class="text-sm text-gray-600">Words</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-green-600" id="statCharacters">0</div>
+                    <div class="text-sm text-gray-600">Characters</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-blue-600" id="statLines">0</div>
+                    <div class="text-sm text-gray-600">Lines</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-purple-600" id="statAccuracy">95%</div>
+                    <div class="text-sm text-gray-600">Accuracy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Global variables
+let currentDocumentId = null;
+let videoStream = null;
+let isProcessing = false;
+let capturedImageBlob = null;
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeExtractPage();
+});
+
+function initializeExtractPage() {
+    console.log('Extract page initialized');
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Check for camera support
+    checkCameraSupport();
+    
+    // Load recent uploads if any
+    loadRecentUploads();
+}
+
+function setupEventListeners() {
+    // File input change
+    document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+    
+    // Click to upload
+    document.getElementById('fileUploadArea').addEventListener('click', function(e) {
+        if (e.target === this || e.target.closest('#uploadContent')) {
+            document.getElementById('fileInput').click();
+        }
+    });
+    
+    // Language selection change
+    document.getElementById('sourceLanguage').addEventListener('change', onLanguageChange);
+    document.getElementById('targetLanguage').addEventListener('change', onLanguageChange);
+}
+
+// File upload handlers
+function dragOverHandler(ev) {
+    ev.preventDefault();
+    const uploadArea = document.getElementById('fileUploadArea');
+    uploadArea.classList.add('dragover');
+}
+
+function dragLeaveHandler(ev) {
+    ev.preventDefault();
+    const uploadArea = document.getElementById('fileUploadArea');
+    uploadArea.classList.remove('dragover');
+}
+
+function dropHandler(ev) {
+    ev.preventDefault();
+    const uploadArea = document.getElementById('fileUploadArea');
+    uploadArea.classList.remove('dragover');
+    
+    const files = Array.from(ev.dataTransfer.files);
+    if (files.length > 0) {
+        processFiles(files);
+    }
+}
+
+function handleFileSelect(event) {
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+        processFiles(files);
+    }
+}
+
+function processFiles(files) {
+    if (isProcessing) {
+        utils.showToast('Please wait for the current processing to complete', 'warning');
+        return;
+    }
+    
+    // Validate files
+    const validFiles = validateFiles(files);
+    if (validFiles.length === 0) {
+        return;
+    }
+    
+    // Process the first valid file (for now, single file processing)
+    uploadFile(validFiles[0]);
+}
+
+function validateFiles(files) {
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+    const maxSize = 16 * 1024 * 1024; // 16MB
+    const validFiles = [];
+    
+    for (const file of files) {
+        if (!validTypes.includes(file.type)) {
+            utils.showToast(`Invalid file type: ${file.name}. Please select PNG, JPG, JPEG, or PDF files.`, 'error');
+            continue;
+        }
+        
+        if (file.size > maxSize) {
+            utils.showToast(`File too large: ${file.name}. Maximum size is 16MB.`, 'error');
+            continue;
+        }
+        
+        validFiles.push(file);
+    }
+    
+    return validFiles;
+}
+
+function uploadFile(file) {
+    if (isProcessing) return;
+    
+    isProcessing = true;
+    showProcessingSection();
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Show upload progress
+    showUploadProgress();
+    
+    // Simulate progress for better UX
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 90) {
+            clearInterval(progressInterval);
+            progress = 90;
+        }
+        updateProgress(progress, 'Uploading...');
+    }, 200);
+    
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        clearInterval(progressInterval);
+        updateProgress(100, 'Upload complete');
+        
+        setTimeout(() => {
+            if (data.success) {
+                currentDocumentId = data.document_id;
+                showResults(file, data.extracted_text);
+                utils.showToast('Text extracted successfully!', 'success');
+            } else {
+                utils.showToast(data.error || 'Failed to extract text', 'error');
+                resetToInitialState();
+            }
+            isProcessing = false;
+        }, 1000);
+    })
+    .catch(error => {
+        clearInterval(progressInterval);
+        console.error('Upload error:', error);
+        utils.showToast('An error occurred during upload', 'error');
+        resetToInitialState();
+        isProcessing = false;
+    });
+}
+
+function showUploadProgress() {
+    document.getElementById('uploadContent').classList.add('hidden');
+    document.getElementById('uploadProgress').classList.remove('hidden');
+}
+
+function updateProgress(percentage, text) {
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    progressBar.style.width = percentage + '%';
+    progressText.textContent = text || `${Math.round(percentage)}% complete`;
+}
+
+function showProcessingSection() {
+    document.getElementById('processingSection').classList.remove('hidden');
+    document.getElementById('resultsSection').classList.add('hidden');
+    
+    // Animate processing steps
+    setTimeout(() => updateProcessingStep(2, 'processing'), 1000);
+    setTimeout(() => updateProcessingStep(3, 'processing'), 2000);
+    setTimeout(() => updateProcessingStep(4, 'processing'), 3000);
+}
+
+function updateProcessingStep(step, status) {
+    const stepElement = document.getElementById(`step${step}`);
+    if (!stepElement) return;
+    
+    if (status === 'processing') {
+        stepElement.classList.remove('bg-gray-50', 'opacity-50');
+        stepElement.classList.add('bg-yellow-50', 'border-l-4', 'border-yellow-400');
+        
+        const icon = stepElement.querySelector('.flex-shrink-0 > div');
+        icon.className = 'loader border-2 border-t-2 border-white rounded-full w-4 h-4';
+        icon.parentElement.className = 'flex-shrink-0 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mr-3';
+    } else if (status === 'complete') {
+        stepElement.classList.remove('bg-yellow-50', 'border-l-4', 'border-yellow-400');
+        stepElement.classList.add('bg-green-50');
+        
+        const icon = stepElement.querySelector('.flex-shrink-0 > div');
+        icon.innerHTML = '<i class="fas fa-check text-white text-sm"></i>';
+        icon.parentElement.className = 'flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3';
+        
+        const checkmark = stepElement.querySelector('.ml-auto');
+        if (checkmark) {
+            checkmark.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+        }
+    }
+}
+
+// Camera functions
+function checkCameraSupport() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const cameraSection = document.querySelector('#cameraSection button');
+        cameraSection.disabled = true;
+        cameraSection.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Camera Not Supported';
+        cameraSection.classList.add('bg-gray-400');
+    }
+}
+
+function startCamera() {
+    const constraints = {
+        video: {
+            facingMode: 'environment', // Prefer back camera
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        }
+    };
+    
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(stream) {
+            videoStream = stream;
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            
+            document.getElementById('cameraSection').classList.add('hidden');
+            document.getElementById('videoSection').classList.remove('hidden');
+            
+            utils.showToast('Camera started successfully', 'success');
+        })
+        .catch(function(err) {
+            console.error('Camera error:', err);
+            utils.showToast('Could not access camera. Please check permissions.', 'error');
+        });
+}
+
+function stopCamera() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+    
+    document.getElementById('videoSection').classList.add('hidden');
+    document.getElementById('photoPreview').classList.add('hidden');
+    document.getElementById('cameraSection').classList.remove('hidden');
+}
+
+function capturePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    
+    // Set canvas size to video size
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame to canvas
+    context.drawImage(video, 0, 0);
+    
+    // Convert to blob
+    canvas.toBlob(function(blob) {
+        capturedImageBlob = blob;
+        
+        // Show preview
+        const capturedImage = document.getElementById('capturedImage');
+        capturedImage.src = URL.createObjectURL(blob);
+        
+        document.getElementById('videoSection').classList.add('hidden');
+        document.getElementById('photoPreview').classList.remove('hidden');
+        
+        utils.showToast('Photo captured successfully', 'success');
+    }, 'image/jpeg', 0.8);
+}
+
+function retakePhoto() {
+    document.getElementById('photoPreview').classList.add('hidden');
+    document.getElementById('videoSection').classList.remove('hidden');
+    capturedImageBlob = null;
+}
+
+function processCapture() {
+    if (!capturedImageBlob) {
+        utils.showToast('No photo to process', 'error');
+        return;
+    }
+    
+    const file = new File([capturedImageBlob], 'captured_photo.jpg', { type: 'image/jpeg' });
+    stopCamera();
+    uploadFile(file);
+}
+
+// Translation functions
+function translateText() {
+    if (!currentDocumentId) {
+        utils.showToast('No document to translate', 'error');
+        return;
+    }
+    
+    const sourceLang = document.getElementById('sourceLanguage').value;
+    const targetLang = document.getElementById('targetLanguage').value;
+    
+    if (sourceLang === targetLang && sourceLang !== 'auto') {
+        utils.showToast('Source and target languages must be different', 'warning');
+        return;
+    }
+    
+    // Show loading state
+    const translateButton = document.getElementById('translateButtonText');
+    const originalText = translateButton.textContent;
+    translateButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Translating...';
+    
+    utils.showToast('Starting translation...', 'info');
+    
+    fetch('/translate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            document_id: currentDocumentId,
+            source_language: sourceLang,
+            target_language: targetLang
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        translateButton.textContent = originalText;
+        
+        if (data.success) {
+            document.getElementById('translatedText').value = data.translated_text;
+            document.getElementById('translationResult').classList.remove('hidden');
+            
+            // Update word count
+            updateWordCount('translatedText', 'translatedWordCount');
+            
+            utils.showToast('Translation completed successfully!', 'success');
+        } else {
+            utils.showToast(data.error || 'Translation failed', 'error');
+        }
+    })
+    .catch(error => {
+        translateButton.textContent = originalText;
+        console.error('Translation error:', error);
+        utils.showToast('An error occurred during translation', 'error');
+    });
+}
+
+function swapLanguages() {
+    const sourceSelect = document.getElementById('sourceLanguage');
+    const targetSelect = document.getElementById('targetLanguage');
+    
+    if (sourceSelect.value === 'auto') {
+        utils.showToast('Cannot swap when source is auto-detect', 'warning');
+        return;
+    }
+    
+    const sourceValue = sourceSelect.value;
+    const targetValue = targetSelect.value;
+    
+    sourceSelect.value = targetValue;
+    targetSelect.value = sourceValue;
+    
+    utils.showToast('Languages swapped', 'info');
+}
+
+function onLanguageChange() {
+    // Reset translation result when language changes
+    document.getElementById('translationResult').classList.add('hidden');
+    document.getElementById('translatedText').value = '';
+}
+
+// Document action functions
+function generatePDF() {
+    if (!currentDocumentId) {
+        utils.showToast('No document to generate PDF', 'error');
+        return;
+    }
+    
+    utils.showToast('Generating PDF...', 'info');
+    
+    // Open PDF in new tab
+    window.open(`/generate_pdf/${currentDocumentId}`, '_blank');
+}
+
+function saveDocument() {
+    if (!currentDocumentId) {
+        utils.showToast('No document to save', 'error');
+        return;
+    }
+    
+    utils.showToast('Document saved to your dashboard', 'success');
+}
+
+function shareDocument() {
+    if (!currentDocumentId) {
+        utils.showToast('No document to share', 'error');
+        return;
+    }
+    
+    // Create shareable link (mock implementation)
+    const shareUrl = `${window.location.origin}/shared/${currentDocumentId}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Extracted Document',
+            text: 'Check out this document I extracted',
+            url: shareUrl
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            utils.showToast('Share link copied to clipboard', 'success');
+        });
+    }
+}
+
+function emailDocument() {
+    if (!currentDocumentId) {
+        utils.showToast('No document to email', 'error');
+        return;
+    }
+    
+    const extractedText = document.getElementById('extractedText').value;
+    const subject = encodeURIComponent('Extracted Document');
+    const body = encodeURIComponent(extractedText);
+    
+    window.open(`mailto:?subject=${subject}&body=${body}`);
+}
+
+function printDocument() {
+    const extractedText = document.getElementById('extractedText').value;
+    const translatedText = document.getElementById('translatedText').value;
+    
+    if (!extractedText && !translatedText) {
+        utils.showToast('No text to print', 'error');
+        return;
+    }
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Extracted Document</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h1 { color: #333; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+                    .section { margin: 20px 0; }
+                    .label { font-weight: bold; color: #666; margin-bottom: 10px; }
+                    .content { white-space: pre-wrap; line-height: 1.6; border-left: 4px solid #3b82f6; padding-left: 15px; }
+                </style>
+            </head>
+            <body>
+                <h1>Document Extraction Results</h1>
+                <div class="section">
+                    <div class="label">Original Text:</div>
+                    <div class="content">${extractedText}</div>
+                </div>
+                ${translatedText ? `
+                <div class="section">
+                    <div class="label">Translated Text:</div>
+                    <div class="content">${translatedText}</div>
+                </div>
+                ` : ''}
+                <div class="section">
+                    <small>Generated by Smart Document Extractor - ${new Date().toLocaleString()}</small>
+                </div>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Utility functions
+function copyText(textareaId) {
+    const textarea = document.getElementById(textareaId);
+    const text = textarea.value;
+    
+    if (!text) {
+        utils.showToast('No text to copy', 'warning');
+        return;
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        utils.showToast('Text copied to clipboard!', 'success');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+        utils.showToast('Failed to copy text', 'error');
+    });
+}
+
+function editText(textareaId) {
+    const textarea = document.getElementById(textareaId);
+    const isReadOnly = textarea.hasAttribute('readonly');
+    
+    if (isReadOnly) {
+        textarea.removeAttribute('readonly');
+        textarea.classList.add('border-yellow-300', 'bg-yellow-50');
+        utils.showToast('Text editing enabled. Click elsewhere to save.', 'info');
+        
+        textarea.focus();
+        
+        // Save on blur
+        textarea.addEventListener('blur', function() {
+            textarea.setAttribute('readonly', true);
+            textarea.classList.remove('border-yellow-300', 'bg-yellow-50');
+            updateWordCount(textareaId, textareaId === 'extractedText' ? 'extractedWordCount' : 'translatedWordCount');
+            utils.showToast('Changes saved', 'success');
+        }, { once: true });
+    }
+}
+
+function updateWordCount(textareaId, countElementId) {
+    const textarea = document.getElementById(textareaId);
+    const countElement = document.getElementById(countElementId);
+    
+    if (!textarea || !countElement) return;
+    
+    const text = textarea.value;
+    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+    countElement.textContent = `${wordCount} words`;
+    
+    // Update statistics if visible
+    if (document.getElementById('resultsSection').classList.contains('hidden') === false) {
+        updateDocumentStats(text);
+    }
+}
+
+function updateDocumentStats(text) {
+    if (!text) return;
+    
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const characters = text.length;
+    const lines = text.split('\n').length;
+    
+    document.getElementById('statWords').textContent = words.toLocaleString();
+    document.getElementById('statCharacters').textContent = characters.toLocaleString();
+    document.getElementById('statLines').textContent = lines.toLocaleString();
+    
+    // Simulate accuracy (in real implementation, this would come from OCR confidence)
+    const accuracy = Math.floor(Math.random() * 10) + 90; // 90-99%
+    document.getElementById('statAccuracy').textContent = accuracy + '%';
+}
+
+function showResults(file, extractedText) {
+    // Hide processing section
+    document.getElementById('processingSection').classList.add('hidden');
+    
+    // Show original image
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const originalImage = document.getElementById('originalImage');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        
+        originalImage.src = e.target.result;
+        originalImage.onload = function() {
+            imagePlaceholder.classList.add('hidden');
+            originalImage.style.display = 'block';
+        };
+    };
+    reader.readAsDataURL(file);
+    
+    // Show file info
+    const fileInfo = document.getElementById('originalFileInfo');
+    fileInfo.textContent = `${file.name} (${utils.formatFileSize(file.size)})`;
+    
+    // Show extracted text
+    document.getElementById('extractedText').value = extractedText;
+    
+    // Update word counts
+    updateWordCount('extractedText', 'extractedWordCount');
+    updateDocumentStats(extractedText);
+    
+    // Show results section
+    document.getElementById('resultsSection').classList.remove('hidden');
+    
+    // Scroll to results
+    document.getElementById('resultsSection').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+    
+    // Add to recent uploads
+    addToRecentUploads(file.name, extractedText);
+}
+
+function startNew() {
+    // Reset all sections
+    resetToInitialState();
+    
+    // Clear data
+    currentDocumentId = null;
+    capturedImageBlob = null;
+    
+    // Reset form inputs
+    document.getElementById('fileInput').value = '';
+    document.getElementById('extractedText').value = '';
+    document.getElementById('translatedText').value = '';
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    utils.showToast('Ready for new document', 'info');
+}
+
+function resetToInitialState() {
+    // Hide sections
+    document.getElementById('processingSection').classList.add('hidden');
+    document.getElementById('resultsSection').classList.add('hidden');
+    document.getElementById('translationResult').classList.add('hidden');
+    
+    // Reset upload area
+    document.getElementById('uploadContent').classList.remove('hidden');
+    document.getElementById('uploadProgress').classList.add('hidden');
+    
+    // Reset camera
+    stopCamera();
+    
+    // Reset processing steps
+    for (let i = 1; i <= 4; i++) {
+        const step = document.getElementById(`step${i}`);
+        if (step) {
+            step.className = 'flex items-center text-left p-3 rounded-lg bg-gray-50 opacity-50';
+        }
+    }
+}
+
+function downloadResults() {
+    if (!currentDocumentId) {
+        utils.showToast('No document to download', 'error');
+        return;
+    }
+    
+    const extractedText = document.getElementById('extractedText').value;
+    const translatedText = document.getElementById('translatedText').value;
+    
+    // Create downloadable content
+    let content = '# Document Extraction Results\n\n';
+    content += `**Extracted on:** ${new Date().toLocaleString()}\n\n`;
+    content += `## Original Text\n${extractedText}\n\n`;
+    
+    if (translatedText) {
+        content += `## Translated Text\n${translatedText}\n\n`;
+    }
+    
+    content += '---\nGenerated by Smart Document Extractor';
+    
+    // Create and download file
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `extracted_document_${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    utils.showToast('Results downloaded', 'success');
+}
+
+function loadRecentUploads() {
+    // Mock recent uploads (in real app, fetch from server)
+    const recentUploads = JSON.parse(localStorage.getItem('recentUploads') || '[]');
+    
+    if (recentUploads.length > 0) {
+        document.getElementById('recentUploads').classList.remove('hidden');
+        const list = document.getElementById('recentUploadsList');
+        
+        list.innerHTML = recentUploads.slice(0, 3).map(upload => `
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-file-text text-gray-400 mr-2"></i>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${upload.name}</div>
+                        <div class="text-xs text-gray-500">${new Date(upload.date).toLocaleDateString()}</div>
+                    </div>
+                </div>
+                <button onclick="loadRecentUpload('${upload.name}')" class="text-primary-600 hover:text-primary-700 text-sm">
+                    Load
+                </button>
+            </div>
+        `).join('');
+    }
+}
+
+function addToRecentUploads(filename, extractedText) {
+    const recentUploads = JSON.parse(localStorage.getItem('recentUploads') || '[]');
+    
+    recentUploads.unshift({
+        name: filename,
+        date: new Date().toISOString(),
+        preview: extractedText.substring(0, 100) + '...'
+    });
+    
+    // Keep only last 5 uploads
+    recentUploads.splice(5);
+    
+    localStorage.setItem('recentUploads', JSON.stringify(recentUploads));
+    loadRecentUploads();
+}
+
+function loadRecentUpload(filename) {
+    utils.showToast(`Loading ${filename}...`, 'info');
+    // In real app, this would load the document from server
+}
+
+// Initialize page when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up initial word count listeners
+    document.getElementById('extractedText').addEventListener('input', function() {
+        updateWordCount('extractedText', 'extractedWordCount');
+    });
+    
+    document.getElementById('translatedText').addEventListener('input', function() {
+        updateWordCount('translatedText', 'translatedWordCount');
+    });
+});
+</script>
+{% endblock %}

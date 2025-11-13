@@ -1,0 +1,129 @@
+# ============================================================
+# Document Extraction System - Complete Requirements
+# ============================================================
+# All OCR engines are FREE and run locally on your machine
+# First run will download AI models (~500MB) - cached locally
+# ============================================================
+
+# Core Flask Web Framework
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Werkzeug==3.0.3
+python-dotenv==1.0.1
+
+# ============================================================
+# OCR Engines (All FREE - In Priority Order for Handwriting)
+# ============================================================
+
+# 1. TrOCR - BEST for handwriting (Microsoft/HuggingFace)
+#    - Most accurate for handwritten text
+#    - Deep learning based
+#    - Supports cursive and print
+transformers==4.37.2
+torch==2.2.0
+torchvision==0.17.0
+sentencepiece==0.2.0
+
+# 2. PaddleOCR - Excellent alternative for handwriting
+#    - Good for both handwritten and printed text
+#    - Fast and accurate
+#    - Supports multiple languages
+paddlepaddle==2.6.1
+paddleocr==2.7.3
+
+# 3. EasyOCR - Great for printed text
+#    - Very good for clear printed documents
+#    - Easy to use
+#    - GPU acceleration support
+easyocr==1.7.1
+
+# 4. Tesseract - Fast fallback option
+#    - Fast processing
+#    - Good for printed text
+#    - Requires system installation of Tesseract-OCR
+pytesseract==0.3.10
+
+# ============================================================
+# Image Processing & Computer Vision
+# ============================================================
+opencv-python==4.9.0.80
+opencv-contrib-python==4.9.0.80
+Pillow==10.2.0
+numpy==1.26.4
+scikit-image==0.22.0
+
+# ============================================================
+# Translation Service
+# ============================================================
+# Groq API - Fast LLM inference (requires free API key)
+# Get your free key at: https://console.groq.com/keys
+groq==0.4.2
+
+# ============================================================
+# PDF Generation
+# ============================================================
+reportlab==4.1.0
+PyPDF2==3.0.1
+
+# ============================================================
+# Database
+# ============================================================
+SQLAlchemy==2.0.28
+
+# ============================================================
+# Additional Utilities
+# ============================================================
+requests==2.31.0
+
+# ============================================================
+# Optional: For Better Performance (Recommended)
+# ============================================================
+# accelerate==0.27.2  # Faster model loading
+# safetensors==0.4.2  # Safer model format
+
+# ============================================================
+# Installation Instructions:
+# ============================================================
+# 1. Install all packages:
+#    pip install -r requirements.txt
+#
+# 2. Install Tesseract-OCR (optional but recommended):
+#    - Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki
+#    - macOS: brew install tesseract
+#    - Linux: sudo apt-get install tesseract-ocr
+#
+# 3. Get Groq API key (for translation):
+#    - Visit: https://console.groq.com/keys
+#    - Create free account
+#    - Generate API key
+#    - Add to .env file: GROQ_API_KEY=your_key_here
+#
+# 4. First run downloads AI models (~500MB):
+#    - TrOCR model: ~400MB
+#    - EasyOCR model: ~100MB
+#    - Models cached in ~/.cache/ folder
+#
+# ============================================================
+# System Requirements:
+# ============================================================
+# - Python 3.8 or higher
+# - 4GB RAM minimum (8GB recommended)
+# - 2GB free disk space for models
+# - Optional: GPU with CUDA for faster processing
+#
+# ============================================================
+# Troubleshooting:
+# ============================================================
+# If torch installation fails:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#
+# If PaddleOCR fails on Windows:
+#   pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
+#
+# If opencv fails:
+#   pip install opencv-python-headless
+#
+# For GPU support (NVIDIA only):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# ============================================================

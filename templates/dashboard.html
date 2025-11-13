@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Document Extractor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+        <p class="text-gray-600">Welcome back, {{ current_user.username }}! Here are your recent documents.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-100 rounded-full">
+                    <i class="fas fa-file-text text-2xl text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Total Documents</h3>
+                    <p class="text-3xl font-bold text-blue-600">{{ documents|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center">
+                <div class="p-3 bg-green-100 rounded-full">
+                    <i class="fas fa-language text-2xl text-green-600"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Translations</h3>
+                    <p class="text-3xl font-bold text-green-600">{{ documents|selectattr('translated_text')|list|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center">
+                <div class="p-3 bg-purple-100 rounded-full">
+                    <i class="fas fa-file-pdf text-2xl text-purple-600"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">PDFs Generated</h3>
+                    <p class="text-3xl font-bold text-purple-600">{{ documents|selectattr('pdf_path')|list|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Quick Actions</h2>
+            <div class="flex flex-wrap gap-4">
+                <a href="{{ url_for('main.extract') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center">
+                    <i class="fas fa-upload mr-2"></i>
+                    Extract New Document
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents List -->
+    <div class="bg-white rounded-xl shadow-lg">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold">Recent Documents</h2>
+        </div>
+        {% if documents %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Languages</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for doc in documents %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <i class="fas fa-file-image text-gray-400 mr-3"></i>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ doc.original_filename }}</div>
+                                        <div class="text-sm text-gray-500">{{ doc.extracted_text[:50] }}{% if doc.extracted_text|length > 50 %}...{% endif %}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-col space-y-1">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>Extracted
+                                    </span>
+                                    {% if doc.translated_text %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <i class="fas fa-language mr-1"></i>Translated
+                                    </span>
+                                    {% endif %}
+                                    {% if doc.pdf_path %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        <i class="fas fa-file-pdf mr-1"></i>PDF Ready
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if doc.source_language and doc.target_language %}
+                                    {{ doc.source_language|upper }} → {{ doc.target_language|upper }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ doc.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    {% if doc.pdf_path %}
+                                    <a href="{{ url_for('main.generate_pdf', document_id=doc.id) }}" class="text-primary-600 hover:text-primary-900" title="Download PDF">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% endif %}
+                                    <button onclick="viewDocument({{ doc.id }})" class="text-green-600 hover:text-green-900" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <form method="POST" action="{{ url_for('main.delete_document', document_id=doc.id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this document?')">
+                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-12 text-center">
+                <i class="fas fa-file-text text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No documents yet</h3>
+                <p class="text-gray-600 mb-6">Start by uploading your first document to extract text.</p>
+                <a href="{{ url_for('main.extract') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center">
+                    <i class="fas fa-upload mr-2"></i>
+                    Upload Document
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Document View Modal -->
+<div id="documentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-96 overflow-hidden">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Document Details</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-80">
+                <div id="modalContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewDocument(docId) {
+    // This would typically fetch document details via AJAX
+    // For now, we'll show a placeholder
+    document.getElementById('modalContent').innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-4"></i>
+            <p>Loading document details...</p>
+        </div>
+    `;
+    document.getElementById('documentModal').classList.remove('hidden');
+    
+    // Simulate loading
+    setTimeout(() => {
+        document.getElementById('modalContent').innerHTML = `
+            <div class="space-y-4">
+                <h4 class="font-semibold">Extracted Text</h4>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p>Document content would be displayed here...</p>
+                </div>
+                <div class="flex space-x-4">
+                    <button class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">
+                        <i class="fas fa-language mr-2"></i>Translate
+                    </button>
+                    <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        <i class="fas fa-file-pdf mr-2"></i>Generate PDF
+                    </button>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+function closeModal() {
+    document.getElementById('documentModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('documentModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}
