@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""
+Patch script for Smart Document Extractor UI error popup fixes.
+Run from: D:\\document extration system\\
+Usage: python patch_ui.py
+"""
+import os
+import re
+
+BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
+BASE_HTML  = os.path.join(BASE_DIR, "templates", "base.html")
+EXTR_HTML  = os.path.join(BASE_DIR, "templates", "extract.html")
+
+def patch_file(path, replacements, label):
+    if not os.path.exists(path):
+        print(f"  NOT FOUND: {path}")
+        return False
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    original = content
+    for old, new in replacements:
+        if old in content:
+            content = content.replace(old, new, 1)
+            print(f"  [OK] Patched: {label} - removed/fixed problematic code")
+        else:
+            print(f"  [SKIP] Already patched or not found: {label}")
+    if content != original:
+        backup = path + ".bak"
+        with open(backup, "w", encoding="utf-8") as f:
+            f.write(original)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"  Saved. Backup: {backup}")
+    return True
+
+print("=" * 60)
+print("Smart Document Extractor - UI Error Popup Fix")
+print("=" * 60)
+
+# ── FIX 1: base.html ─────────────────────────────────────────
+# Remove the over-aggressive global window.onerror handler.
+# It fires on ANY unhandled JS exception anywhere on the page,
+# including innocent resource load failures and minor DOM errors,
+# showing a fake "An unexpected error occurred" toast every time.
+
+print("\nPatching base.html...")
+base_patches = [
+    # Remove global window error handler (fires on any JS exception)
+    (
+        "window.addEventListener('error', function(e) {\n        console.error('Global error:', e.error);\n        showToast('An unexpected error occurred', 'error');\n    });",
+        "// Global error handler removed: was triggering false-positive error toasts"
+    ),
+    # Some versions use double-spaces or slight formatting differences — try alternate
+    (
+        "window.addEventListener('error', function(e) {\n            console.error('Global error:', e.error);\n            showToast('An unexpected error occurred', 'error');\n        });",
+        "// Global error handler removed: was triggering false-positive error toasts"
+    ),
+    # Remove unhandledrejection handler if present (same problem for Promises)
+    (
+        "window.addEventListener('unhandledrejection', function(e) {\n        console.error('Unhandled rejection:', e.reason);\n        showToast('An unexpected error occurred', 'error');\n    });",
+        "// Unhandledrejection handler removed: was triggering false-positive error toasts"
+    ),
+    (
+        "window.addEventListener('unhandledrejection', function(e) {\n            console.error('Unhandled rejection:', e.reason);\n            showToast('An unexpected error occurred', 'error');\n        });",
+        "// Unhandledrejection handler removed: was triggering false-positive error toasts"
+    ),
+]
+patch_file(BASE_HTML, base_patches, "global window.onerror handler")
+
+# ── FIX 2: extract.html ──────────────────────────────────────
+# After a successful upload, isProcessing was never set to false.
+# If the user tried to re-upload (even by accident), the
+# "Please wait for the current processing to complete" warning fired.
+# Also fix so only one toast fires per upload outcome.
+
+print("\nPatching extract.html...")
+extract_patches = [
+    # Fix: add isProcessing = false after showing success toast
+    (
+        "utils.showToast('Text extracted successfully!', 'success');",
+        "utils.showToast('Text extracted successfully!', 'success');\n                        isProcessing = false;"
+    ),
+    # Some versions have the toast with a slightly different string
+    (
+        "utils.showToast(\'Text extracted successfully!\', \'success\');",
+        "utils.showToast(\'Text extracted successfully!\', \'success\');\n                        isProcessing = false;"
+    ),
+    # Remove the duplicate catch-all error toast in the upload .catch()
+    # (it fires in addition to the real error, causing two red popups)
+    (
+        "utils.showToast('An unexpected error occurred', 'error');",
+        "// Removed duplicate error toast (error already shown by specific handlers)"
+    ),
+    (
+        "utils.showToast(\'An unexpected error occurred\', \'error\');",
+        "// Removed duplicate error toast (error already shown by specific handlers)"
+    ),
+    # Fix: translation error handler — avoid generic "unexpected error" message
+    (
+        "utils.showToast('An error occurred during translation', 'error');",
+        "utils.showToast(error.message || 'Translation request failed', 'error');"
+    ),
+    # Fix: upload error handler — be specific
+    (
+        "utils.showToast('An error occurred during upload', 'error');",
+        "utils.showToast('Upload failed: ' + (error.message || 'network error'), 'error');"
+    ),
+]
+patch_file(EXTR_HTML, extract_patches, "isProcessing flag and duplicate error toasts")
+
+print("\n" + "=" * 60)
+print("Done! Restart Flask server: py app.py")
+print("=" * 60)

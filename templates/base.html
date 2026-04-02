@@ -101,7 +101,7 @@
         
         /* Custom scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-track {
@@ -151,9 +151,19 @@
         /* Toast notification positioning */
         .toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 1rem;
+            right: 1rem;
+            left: 1rem;
             z-index: 9999;
+        }
+        
+        @media (min-width: 640px) {
+            .toast-container {
+                left: auto;
+                right: 1.25rem;
+                top: 1.25rem;
+                width: 20rem;
+            }
         }
         
         /* Video preview styles */
@@ -177,58 +187,7 @@
             backdrop-filter: blur(8px);
             background-color: rgba(0, 0, 0, 0.5);
         }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .mobile-padding {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            .mobile-text-sm {
-                font-size: 0.875rem;
-            }
-            
-            .mobile-hidden {
-                display: none;
-            }
-        }
-        
-        /* Print styles */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            
-            body {
-                background: white !important;
-                color: black !important;
-            }
-        }
-        
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            .dark-mode-text {
-                color: #f9fafb;
-            }
-            
-            .dark-mode-bg {
-                background-color: #1f2937;
-            }
-        }
-        
-        /* Selection styling */
-        ::selection {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-        
-        /* Focus states */
-        input:focus, textarea:focus, select:focus, button:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
+
         /* Pulse animation for loading states */
         .pulse-animation {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -253,105 +212,155 @@
             margin-right: 8px;
         }
         
-        .status-dot.success {
-            background-color: #10b981;
+        .status-dot.success { background-color: #10b981; }
+        .status-dot.warning { background-color: #f59e0b; }
+        .status-dot.error   { background-color: #ef4444; }
+        .status-dot.info    { background-color: #3b82f6; }
+
+        /* Mobile responsive table */
+        @media (max-width: 639px) {
+            .responsive-table thead {
+                display: none;
+            }
+            .responsive-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.75rem;
+                padding: 0.75rem;
+            }
+            .responsive-table td {
+                display: flex;
+                align-items: flex-start;
+                padding: 0.5rem 0.25rem;
+                border: none;
+                font-size: 0.875rem;
+            }
+            .responsive-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6b7280;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                min-width: 90px;
+                flex-shrink: 0;
+                padding-top: 0.1rem;
+            }
         }
         
-        .status-dot.warning {
-            background-color: #f59e0b;
+        /* Print styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
         }
         
-        .status-dot.error {
-            background-color: #ef4444;
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .dark-mode-text { color: #f9fafb; }
+            .dark-mode-bg   { background-color: #1f2937; }
         }
         
-        .status-dot.info {
-            background-color: #3b82f6;
+        /* Selection styling */
+        ::selection {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        /* Focus states */
+        input:focus, textarea:focus, select:focus, button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen font-sans flex flex-col">
+
     <!-- Navigation Header -->
-    <nav class="glass shadow-lg sticky top-0 z-50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="glass shadow-lg sticky top-0 z-50 backdrop-blur-md no-print">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
+
                 <!-- Logo and Brand -->
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-lg">
-                            <i class="fas fa-file-text text-white text-lg"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-                                Smart Document Extractor
-                            </h1>
-                            <p class="text-xs text-gray-500 hidden sm:block">AI-Powered OCR & Translation</p>
-                        </div>
+                <a href="{{ url_for('main.index') }}" class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                    <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-lg">
+                        <i class="fas fa-file-alt text-white text-base sm:text-lg"></i>
                     </div>
-                </div>
+                    <div class="min-w-0">
+                        <h1 class="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent leading-tight truncate">
+                            <span class="hidden xs:inline">Smart Document Extractor</span>
+                            <span class="xs:hidden">SmartDoc</span>
+                        </h1>
+                        <p class="text-xs text-gray-500 hidden md:block">AI-Powered OCR &amp; Translation</p>
+                    </div>
+                </a>
                 
-                <!-- Navigation Links -->
+                <!-- Desktop Navigation Links -->
                 <div class="hidden md:flex items-center space-x-6">
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('main.index') }}" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 flex items-center">
+                        <a href="{{ url_for('main.index') }}" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 flex items-center text-sm">
                             <i class="fas fa-home mr-2"></i>Home
                         </a>
-                        <a href="{{ url_for('main.dashboard') }}" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 flex items-center">
+                        <a href="{{ url_for('main.dashboard') }}" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 flex items-center text-sm">
                             <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                         </a>
-                        <a href="{{ url_for('main.extract') }}" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 flex items-center">
+                        <a href="{{ url_for('main.extract') }}" class="text-gray-600 hover:text-primary-600 transition-colors duration-200 flex items-center text-sm">
                             <i class="fas fa-upload mr-2"></i>Extract
                         </a>
                     {% endif %}
                 </div>
                 
-                <!-- User Menu -->
-                <div class="flex items-center space-x-4">
+                <!-- Right Side: User Menu + Mobile Toggle -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
                     {% if current_user.is_authenticated %}
-                        <div class="relative group">
+                        <!-- User Dropdown (desktop) -->
+                        <div class="relative group hidden sm:block">
                             <button class="flex items-center space-x-2 text-gray-700 hover:text-primary-600 transition-colors duration-200 p-2 rounded-lg hover:bg-white/50">
-                                <div class="w-8 h-8 bg-gradient-to-r from-primary-400 to-primary-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                <div class="w-8 h-8 bg-gradient-to-r from-primary-400 to-primary-500 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                                     {{ current_user.username[0].upper() }}
                                 </div>
-                                <span class="hidden sm:block font-medium">{{ current_user.username }}</span>
-                                <i class="fas fa-chevron-down text-xs"></i>
+                                <span class="hidden lg:block font-medium text-sm max-w-24 truncate">{{ current_user.username }}</span>
+                                <i class="fas fa-chevron-down text-xs hidden lg:block"></i>
                             </button>
-                            
                             <!-- Dropdown Menu -->
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100">
+                            <div class="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100">
                                 <div class="py-2">
-                                    <div class="px-4 py-2 border-b border-gray-100">
-                                        <p class="text-sm font-medium text-gray-900">{{ current_user.username }}</p>
-                                        <p class="text-xs text-gray-500">{{ current_user.email }}</p>
+                                    <div class="px-4 py-3 border-b border-gray-100">
+                                        <p class="text-sm font-semibold text-gray-900 truncate">{{ current_user.username }}</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ current_user.email }}</p>
                                     </div>
                                     <a href="{{ url_for('main.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                        <i class="fas fa-user mr-3 text-gray-400"></i>Profile
+                                        <i class="fas fa-user mr-3 text-gray-400 w-4"></i>Profile
                                     </a>
                                     <a href="{{ url_for('main.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                        <i class="fas fa-cog mr-3 text-gray-400"></i>Settings
+                                        <i class="fas fa-cog mr-3 text-gray-400 w-4"></i>Settings
                                     </a>
-                                    <div class="border-t border-gray-100 mt-2 pt-2">
+                                    <div class="border-t border-gray-100 mt-1 pt-1">
                                         <a href="{{ url_for('auth.logout') }}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                            <i class="fas fa-sign-out-alt mr-3"></i>Sign Out
+                                            <i class="fas fa-sign-out-alt mr-3 w-4"></i>Sign Out
                                         </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     {% else %}
-                        <div class="flex items-center space-x-3">
-                            <a href="{{ url_for('auth.login') }}" class="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200">
+                        <div class="hidden sm:flex items-center space-x-3">
+                            <a href="{{ url_for('auth.login') }}" class="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200 text-sm">
                                 Sign In
                             </a>
-                            <a href="{{ url_for('auth.register') }}" class="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200 btn-hover-lift">
+                            <a href="{{ url_for('auth.register') }}" class="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200 btn-hover-lift text-sm whitespace-nowrap">
                                 Get Started
                             </a>
                         </div>
                     {% endif %}
                     
                     <!-- Mobile Menu Button -->
-                    <button class="md:hidden p-2 rounded-lg text-gray-600 hover:text-primary-600 hover:bg-white/50 transition-colors" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars text-lg"></i>
+                    <button class="md:hidden p-2 rounded-lg text-gray-600 hover:text-primary-600 hover:bg-white/50 transition-colors flex-shrink-0" 
+                            onclick="toggleMobileMenu()" 
+                            aria-label="Toggle menu"
+                            aria-expanded="false"
+                            id="menuButton">
+                        <i class="fas fa-bars text-lg" id="menuIcon"></i>
                     </button>
                 </div>
             </div>
@@ -359,27 +368,37 @@
         
         <!-- Mobile Menu -->
         <div id="mobileMenu" class="md:hidden hidden border-t border-white/20 bg-white/95 backdrop-blur-md">
-            <div class="px-4 py-4 space-y-3">
+            <div class="px-4 py-4 space-y-1">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('main.index') }}" class="flex items-center px-3 py-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        <i class="fas fa-home mr-3"></i>Home
+                    <!-- User info banner -->
+                    <div class="flex items-center space-x-3 px-3 py-3 mb-2 bg-primary-50 rounded-xl">
+                        <div class="w-9 h-9 bg-gradient-to-r from-primary-400 to-primary-500 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                            {{ current_user.username[0].upper() }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-gray-900 truncate">{{ current_user.username }}</p>
+                            <p class="text-xs text-gray-500 truncate">{{ current_user.email }}</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('main.index') }}" class="flex items-center px-3 py-2.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors text-sm">
+                        <i class="fas fa-home mr-3 w-4 text-gray-400"></i>Home
                     </a>
-                    <a href="{{ url_for('main.dashboard') }}" class="flex items-center px-3 py-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
+                    <a href="{{ url_for('main.dashboard') }}" class="flex items-center px-3 py-2.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors text-sm">
+                        <i class="fas fa-tachometer-alt mr-3 w-4 text-gray-400"></i>Dashboard
                     </a>
-                    <a href="{{ url_for('main.extract') }}" class="flex items-center px-3 py-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        <i class="fas fa-upload mr-3"></i>Extract
+                    <a href="{{ url_for('main.extract') }}" class="flex items-center px-3 py-2.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors text-sm">
+                        <i class="fas fa-upload mr-3 w-4 text-gray-400"></i>Extract
                     </a>
-                    <hr class="border-gray-200">
-                    <a href="{{ url_for('auth.logout') }}" class="flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <i class="fas fa-sign-out-alt mr-3"></i>Sign Out
+                    <hr class="border-gray-200 my-2">
+                    <a href="{{ url_for('auth.logout') }}" class="flex items-center px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm">
+                        <i class="fas fa-sign-out-alt mr-3 w-4"></i>Sign Out
                     </a>
                 {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="flex items-center px-3 py-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        <i class="fas fa-sign-in-alt mr-3"></i>Sign In
+                    <a href="{{ url_for('auth.login') }}" class="flex items-center px-3 py-2.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors text-sm">
+                        <i class="fas fa-sign-in-alt mr-3 w-4 text-gray-400"></i>Sign In
                     </a>
-                    <a href="{{ url_for('auth.register') }}" class="flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                        <i class="fas fa-user-plus mr-3"></i>Get Started
+                    <a href="{{ url_for('auth.register') }}" class="flex items-center justify-center px-3 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium">
+                        <i class="fas fa-user-plus mr-2"></i>Get Started Free
                     </a>
                 {% endif %}
             </div>
@@ -389,15 +408,19 @@
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3">
                 {% for category, message in messages %}
-                    <div class="alert mb-4 p-4 rounded-lg shadow-lg animate-fade-in {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% elif category == 'success' %}bg-green-50 text-green-700 border border-green-200{% elif category == 'warning' %}bg-yellow-50 text-yellow-700 border border-yellow-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <i class="fas fa-{% if category == 'error' %}exclamation-triangle{% elif category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} mr-3"></i>
+                    <div class="alert mb-3 p-3 sm:p-4 rounded-lg shadow-lg animate-fade-in text-sm
+                        {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200
+                        {% elif category == 'success' %}bg-green-50 text-green-700 border border-green-200
+                        {% elif category == 'warning' %}bg-yellow-50 text-yellow-700 border border-yellow-200
+                        {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-{% if category == 'error' %}exclamation-triangle{% elif category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} mr-3 mt-0.5 flex-shrink-0"></i>
                                 <span class="font-medium">{{ message }}</span>
                             </div>
-                            <button onclick="this.parentElement.parentElement.remove()" class="text-current opacity-70 hover:opacity-100 transition-opacity">
+                            <button onclick="this.parentElement.parentElement.remove()" class="text-current opacity-70 hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -413,48 +436,22 @@
     </main>
 
     <!-- Footer -->
-    <footer class="glass mt-20 border-t border-white/20">
-        <div class="max-w-7xl mx-auto px-4 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer class="glass mt-16 sm:mt-20 border-t border-white/20 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8">
                 <!-- Brand -->
-                <div class="space-y-4">
+                <div class="col-span-2 sm:col-span-2 md:col-span-1 space-y-4">
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-file-text text-white text-sm"></i>
+                        <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-file-alt text-white text-sm"></i>
                         </div>
-                        <span class="font-bold text-gray-900">Smart Document Extractor</span>
+                        <span class="font-bold text-gray-900 text-sm">Smart Document Extractor</span>
                     </div>
-                    <p class="text-gray-600 text-sm">
+                    <p class="text-gray-600 text-sm leading-relaxed">
                         Transform your documents with AI-powered OCR and translation technology.
                     </p>
-                </div>
-                
-                <!-- Features -->
-                <div>
-                    <h3 class="font-semibold text-gray-900 mb-4">Features</h3>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>OCR Text Extraction</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Multi-Language Translation</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>PDF Generation</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Camera Capture</li>
-                    </ul>
-                </div>
-                
-                <!-- Support -->
-                <div>
-                    <h3 class="font-semibold text-gray-900 mb-4">Support</h3>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Documentation</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">API Reference</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Help Center</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Contact Us</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Connect -->
-                <div>
-                    <h3 class="font-semibold text-gray-900 mb-4">Connect</h3>
-                    <div class="flex space-x-3">
+                    <!-- Social Links -->
+                    <div class="flex space-x-3 pt-1">
                         <a href="#" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-primary-100 hover:text-primary-600 transition-colors">
                             <i class="fab fa-twitter text-sm"></i>
                         </a>
@@ -466,10 +463,47 @@
                         </a>
                     </div>
                 </div>
+                
+                <!-- Features -->
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-4 text-sm">Features</h3>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>OCR Text Extraction</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Multi-Language</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>PDF Generation</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Camera Capture</li>
+                    </ul>
+                </div>
+                
+                <!-- Support -->
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-4 text-sm">Support</h3>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">API Reference</a></li>
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-4 text-sm">Quick Links</h3>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('main.dashboard') }}" class="hover:text-primary-600 transition-colors">Dashboard</a></li>
+                        <li><a href="{{ url_for('main.extract') }}" class="hover:text-primary-600 transition-colors">Extract Text</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}" class="hover:text-primary-600 transition-colors">Sign Out</a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('auth.login') }}" class="hover:text-primary-600 transition-colors">Sign In</a></li>
+                        <li><a href="{{ url_for('auth.register') }}" class="hover:text-primary-600 transition-colors">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
             
-            <div class="border-t border-gray-200 mt-8 pt-8 text-center">
-                <p class="text-gray-600 text-sm">
+            <div class="border-t border-gray-200 mt-8 pt-6 text-center">
+                <p class="text-gray-500 text-xs sm:text-sm">
                     &copy; 2024 Smart Document Extractor. Built with Flask, Tailwind CSS, and AI. All rights reserved.
                 </p>
             </div>
@@ -480,8 +514,8 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-        <div class="bg-white rounded-xl p-8 max-w-sm w-full mx-4 text-center">
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl">
             <div class="loader border-4 border-t-4 border-gray-200 rounded-full w-12 h-12 mx-auto mb-4"></div>
             <h3 class="text-lg font-semibold text-gray-900 mb-2">Processing...</h3>
             <p class="text-gray-600 text-sm">Please wait while we process your document.</p>
@@ -493,16 +527,33 @@
         // Mobile menu toggle
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = document.getElementById('menuIcon');
+            const menuButton = document.getElementById('menuButton');
+            const isHidden = mobileMenu.classList.contains('hidden');
+            
             mobileMenu.classList.toggle('hidden');
+            menuIcon.className = isHidden ? 'fas fa-times text-lg' : 'fas fa-bars text-lg';
+            menuButton.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
         }
         
         // Close mobile menu when clicking outside
         document.addEventListener('click', function(event) {
             const mobileMenu = document.getElementById('mobileMenu');
-            const menuButton = event.target.closest('[onclick="toggleMobileMenu()"]');
+            const menuButton = document.getElementById('menuButton');
             
-            if (!menuButton && !mobileMenu.contains(event.target)) {
+            if (!menuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
                 mobileMenu.classList.add('hidden');
+                document.getElementById('menuIcon').className = 'fas fa-bars text-lg';
+                menuButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Close mobile menu on resize to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                const mobileMenu = document.getElementById('mobileMenu');
+                mobileMenu.classList.add('hidden');
+                document.getElementById('menuIcon').className = 'fas fa-bars text-lg';
             }
         });
         
@@ -522,15 +573,15 @@
             
             const toast = document.createElement('div');
             toast.id = toastId;
-            toast.className = `mb-4 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 max-w-sm ${getToastClasses(type)}`;
+            toast.className = `mb-3 p-3 sm:p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 w-full text-sm ${getToastClasses(type)}`;
             
             toast.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="${getToastIcon(type)} mr-3"></i>
-                        <span class="font-medium">${message}</span>
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="${getToastIcon(type)} flex-shrink-0"></i>
+                        <span class="font-medium leading-snug">${message}</span>
                     </div>
-                    <button onclick="removeToast('${toastId}')" class="text-current opacity-70 hover:opacity-100 ml-4">
+                    <button onclick="removeToast('${toastId}')" class="text-current opacity-70 hover:opacity-100 flex-shrink-0">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -538,16 +589,10 @@
             
             toastContainer.appendChild(toast);
             
-            // Animate in
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full');
-            }, 10);
+            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
             
-            // Auto remove
             if (duration > 0) {
-                setTimeout(() => {
-                    removeToast(toastId);
-                }, duration);
+                setTimeout(() => removeToast(toastId), duration);
             }
         }
         
@@ -555,18 +600,16 @@
             const toast = document.getElementById(toastId);
             if (toast) {
                 toast.classList.add('translate-x-full');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
+                setTimeout(() => toast.remove(), 300);
             }
         }
         
         function getToastClasses(type) {
             const classes = {
                 'success': 'bg-green-500 text-white',
-                'error': 'bg-red-500 text-white',
+                'error':   'bg-red-500 text-white',
                 'warning': 'bg-yellow-500 text-white',
-                'info': 'bg-blue-500 text-white'
+                'info':    'bg-blue-500 text-white'
             };
             return classes[type] || classes.success;
         }
@@ -574,62 +617,44 @@
         function getToastIcon(type) {
             const icons = {
                 'success': 'fas fa-check-circle',
-                'error': 'fas fa-exclamation-circle',
+                'error':   'fas fa-exclamation-circle',
                 'warning': 'fas fa-exclamation-triangle',
-                'info': 'fas fa-info-circle'
+                'info':    'fas fa-info-circle'
             };
             return icons[type] || icons.success;
         }
         
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
         });
         
-        // Global error handler
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-            showToast('An unexpected error occurred', 'error');
-        });
-        
         // Page visibility change handler
         document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                console.log('Page hidden');
-            } else {
-                console.log('Page visible');
-            }
+            console.log(document.hidden ? 'Page hidden' : 'Page visible');
         });
         
-        // Initialize tooltips and other interactive elements
+        // Initialize on DOM ready
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Smart Document Extractor loaded successfully');
-            
-            // Initialize any additional features here
             initializeInteractiveElements();
         });
         
         function initializeInteractiveElements() {
-            // Add hover effects to buttons
-            const buttons = document.querySelectorAll('button, .btn');
-            buttons.forEach(button => {
-                button.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-1px)';
+            // Skip hover lift on touch devices
+            if (window.matchMedia('(hover: hover)').matches) {
+                const buttons = document.querySelectorAll('button, .btn');
+                buttons.forEach(button => {
+                    button.addEventListener('mouseenter', function() { this.style.transform = 'translateY(-1px)'; });
+                    button.addEventListener('mouseleave', function() { this.style.transform = 'translateY(0)'; });
                 });
-                
-                button.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                });
-            });
+            }
         }
         
         // Utility functions
@@ -639,7 +664,6 @@
             hideLoadingOverlay,
             removeToast,
             
-            // Format file size
             formatFileSize: function(bytes) {
                 if (bytes === 0) return '0 Bytes';
                 const k = 1024;
@@ -648,19 +672,14 @@
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             },
             
-            // Validate file type
             isValidFileType: function(file, allowedTypes) {
                 return allowedTypes.includes(file.type);
             },
             
-            // Debounce function
             debounce: function(func, wait) {
                 let timeout;
                 return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
+                    const later = () => { clearTimeout(timeout); func(...args); };
                     clearTimeout(timeout);
                     timeout = setTimeout(later, wait);
                 };
@@ -668,7 +687,6 @@
         };
     </script>
     
-    <!-- Include additional page-specific scripts -->
     {% block scripts %}{% endblock %}
 </body>
 </html>

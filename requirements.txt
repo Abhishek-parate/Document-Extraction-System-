@@ -6,11 +6,11 @@
 # ============================================================
 
 # Core Flask Web Framework
-Flask==3.0.3
-Flask-SQLAlchemy==3.1.1
-Flask-Login==0.6.3
-Werkzeug==3.0.3
-python-dotenv==1.0.1
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Werkzeug
+python-dotenv
 
 # ============================================================
 # OCR Engines (All FREE - In Priority Order for Handwriting)
@@ -20,61 +20,61 @@ python-dotenv==1.0.1
 #    - Most accurate for handwritten text
 #    - Deep learning based
 #    - Supports cursive and print
-transformers==4.37.2
-torch==2.2.0
-torchvision==0.17.0
-sentencepiece==0.2.0
+transformers
+torch
+torchvision
+sentencepiece
 
 # 2. PaddleOCR - Excellent alternative for handwriting
 #    - Good for both handwritten and printed text
 #    - Fast and accurate
 #    - Supports multiple languages
-paddlepaddle==2.6.1
-paddleocr==2.7.3
+paddlepaddle
+paddleocr
 
 # 3. EasyOCR - Great for printed text
 #    - Very good for clear printed documents
 #    - Easy to use
 #    - GPU acceleration support
-easyocr==1.7.1
+easyocr
 
 # 4. Tesseract - Fast fallback option
 #    - Fast processing
 #    - Good for printed text
 #    - Requires system installation of Tesseract-OCR
-pytesseract==0.3.10
+pytesseract
 
 # ============================================================
 # Image Processing & Computer Vision
 # ============================================================
-opencv-python==4.9.0.80
-opencv-contrib-python==4.9.0.80
-Pillow==10.2.0
-numpy==1.26.4
-scikit-image==0.22.0
+opencv-python
+opencv-contrib-python
+Pillow
+numpy
+scikit-image
 
 # ============================================================
 # Translation Service
 # ============================================================
 # Groq API - Fast LLM inference (requires free API key)
 # Get your free key at: https://console.groq.com/keys
-groq==0.4.2
+groq
 
 # ============================================================
 # PDF Generation
 # ============================================================
-reportlab==4.1.0
-PyPDF2==3.0.1
+reportlab
+PyPDF2
 
 # ============================================================
 # Database
 # ============================================================
-SQLAlchemy==2.0.28
+SQLAlchemy
 
 # ============================================================
 # Additional Utilities
 # ============================================================
-requests==2.31.0
+requests
 
 # ============================================================
 # Optional: For Better Performance (Recommended)

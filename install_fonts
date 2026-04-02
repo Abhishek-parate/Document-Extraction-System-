@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""
+Font installer for Smart Document Extractor.
+Run once: python install_fonts.py
+This downloads NotoSans + NotoSansDevanagari into the fonts/ folder
+so that PDF generation works for ALL languages (Hindi, Arabic, Chinese, etc.)
+"""
+import os
+import sys
+import urllib.request
+
+FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
+os.makedirs(FONTS_DIR, exist_ok=True)
+
+FONTS_TO_DOWNLOAD = [
+    (
+        "NotoSans-Regular.ttf",
+        "https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf",
+        "General Unicode (Latin, Greek, Cyrillic, etc.)",
+    ),
+    (
+        "NotoSansDevanagari-Regular.ttf",
+        "https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSansDevanagari/NotoSansDevanagari-Regular.ttf",
+        "Hindi / Devanagari script",
+    ),
+    (
+        "NotoSansArabic-Regular.ttf",
+        "https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSansArabic/NotoSansArabic-Regular.ttf",
+        "Arabic script",
+    ),
+]
+
+def download_font(filename, url, description):
+    dest = os.path.join(FONTS_DIR, filename)
+    if os.path.exists(dest) and os.path.getsize(dest) > 10_000:
+        print(f"  [SKIP] {filename} already exists ({os.path.getsize(dest)//1024} KB)")
+        return True
+    try:
+        print(f"  Downloading {filename} ({description})...")
+        urllib.request.urlretrieve(url, dest)
+        size_kb = os.path.getsize(dest) // 1024
+        if size_kb < 10:
+            os.remove(dest)
+            print(f"  [FAIL] {filename} — download incomplete")
+            return False
+        print(f"  [OK]   {filename} ({size_kb} KB)")
+        return True
+    except Exception as e:
+        print(f"  [FAIL] {filename}: {e}")
+        return False
+
+def check_windows_fonts():
+    windows_fonts = [
+        (r"C:\Windows\Fonts\NirmalaUI.ttf", "NirmalaUI (covers all Indian scripts)"),
+        (r"C:\Windows\Fonts\Nirmala.ttf",   "Nirmala (covers all Indian scripts)"),
+        (r"C:\Windows\Fonts\arialuni.ttf",  "Arial Unicode MS"),
+    ]
+    print("\nChecking pre-installed Windows fonts:")
+    for path, name in windows_fonts:
+        if os.path.exists(path):
+            print(f"  [FOUND] {name}")
+            return path
+        else:
+            print(f"  [    ] {name}")
+    return None
+
+def verify_reportlab(font_path):
+    try:
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.platypus import SimpleDocTemplate, Paragraph
+
+        pdfmetrics.registerFont(TTFont("TestFont", font_path))
+        test_pdf = os.path.join(FONTS_DIR, "test_unicode.pdf")
+
+        doc = SimpleDocTemplate(test_pdf, pagesize=A4)
+        style = ParagraphStyle("t", fontName="TestFont", fontSize=12, leading=18)
+        story = [
+            Paragraph("English: Hello World", style),
+            Paragraph("Hindi: \u0928\u092e\u0938\u094d\u0924\u0947 \u0926\u0941\u0928\u093f\u092f\u093e", style),
+            Paragraph("Arabic: \u0645\u0631\u062d\u0628\u0627 \u0628\u0627\u0644\u0639\u0627\u0644\u0645", style),
+        ]
+        doc.build(story)
+        print(f"\n  [OK] Test PDF created: {test_pdf}")
+        print("       Open it to verify Hindi/Arabic text renders correctly.")
+        return True
+    except Exception as e:
+        print(f"\n  [FAIL] ReportLab test: {e}")
+        return False
+
+print("=" * 60)
+print("Smart Document Extractor — Font Installer")
+print("=" * 60)
+
+# Check if Windows fonts are available first
+win_font = check_windows_fonts()
+if win_font:
+    print(f"\nWindows system font found — will be used as primary font.")
+    print(f"Downloading additional fonts as fallbacks...")
+
+print("\nDownloading Noto fonts...")
+success = []
+for fname, url, desc in FONTS_TO_DOWNLOAD:
+    if download_font(fname, url, desc):
+        success.append(os.path.join(FONTS_DIR, fname))
+
+if success:
+    best_font = success[0]
+    print(f"\nVerifying PDF generation with font: {os.path.basename(best_font)}")
+    verify_reportlab(best_font)
+else:
+    if win_font:
+        print(f"\nVerifying PDF generation with Windows font: {win_font}")
+        verify_reportlab(win_font)
+    else:
+        print("\nNo fonts available. Install manually or check internet connection.")
+        sys.exit(1)
+
+print("\n" + "=" * 60)
+print("Done! Copy the fixed pdf_generator.py now:")
+print('  copy pdf_generator_FIXED.py "D:\\document extration system\\utils\\pdf_generator.py"')
+print("=" * 60)
